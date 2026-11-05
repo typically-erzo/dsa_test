@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class SupplierPanel extends JPanel implements ActionListener {
+
     private JTable table;
     private DefaultTableModel tableModel;
     private JTextField idField, nameField, contactField, addressField;
@@ -25,7 +26,12 @@ public class SupplierPanel extends JPanel implements ActionListener {
         setLayout(null);
         setBounds(0, 0, 960, 680);
 
-        tableModel = new DefaultTableModel(new String[]{"Supplier ID", "Name", "Contact Info", "Address"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"Supplier ID", "Name", "Contact Info", "Address"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(30, 30, 900, 300);
@@ -45,68 +51,69 @@ public class SupplierPanel extends JPanel implements ActionListener {
             }
         });
 
-        int startY = 350;
-        int lblX = 30, txtX = 140, width = 300, height = 25;
+        // Form Fields (Row 1 - Y: 350)
+        JLabel lblId = new JLabel("Supplier ID:");
+        lblId.setBounds(30, 350, 100, 25);
+        add(lblId);
 
-        add(createLabel("Supplier ID:", lblX, startY));
         idField = new JTextField();
-        idField.setBounds(txtX, startY, width, height);
+        idField.setBounds(140, 350, 300, 25);
         add(idField);
 
-        add(createLabel("Name:", lblX + 460, startY));
+        JLabel lblName = new JLabel("Name:");
+        lblName.setBounds(490, 350, 100, 25);
+        add(lblName);
+
         nameField = new JTextField();
-        nameField.setBounds(txtX + 460, startY, width, height);
+        nameField.setBounds(600, 350, 300, 25);
         add(nameField);
 
-        startY += 40;
-        add(createLabel("Contact:", lblX, startY));
+        // Form Fields (Row 2 - Y: 390)
+        JLabel lblContact = new JLabel("Contact:");
+        lblContact.setBounds(30, 390, 100, 25);
+        add(lblContact);
+
         contactField = new JTextField();
-        contactField.setBounds(txtX, startY, width, height);
+        contactField.setBounds(140, 390, 300, 25);
         add(contactField);
 
-        add(createLabel("Address:", lblX + 460, startY));
+        JLabel lblAddress = new JLabel("Address:");
+        lblAddress.setBounds(490, 390, 100, 25);
+        add(lblAddress);
+
         addressField = new JTextField();
-        addressField.setBounds(txtX + 460, startY, width, height);
+        addressField.setBounds(600, 390, 300, 25);
         add(addressField);
 
-        startY += 60;
-        int btnW = 160, btnH = 35;
-
+        // Action Buttons (Y: 450)
         addButton = new JButton("Add Supplier");
-        addButton.setBounds(30, startY, btnW, btnH);
+        addButton.setBounds(30, 450, 160, 35);
         addButton.addActionListener(this);
         add(addButton);
 
         updateButton = new JButton("Update Selected");
-        updateButton.setBounds(210, startY, btnW, btnH);
+        updateButton.setBounds(210, 450, 160, 35);
         updateButton.addActionListener(this);
         add(updateButton);
 
         deleteButton = new JButton("Delete Supplier");
-        deleteButton.setBounds(390, startY, btnW, btnH);
+        deleteButton.setBounds(390, 450, 160, 35);
         deleteButton.addActionListener(this);
         add(deleteButton);
 
         clearButton = new JButton("Clear Form");
-        clearButton.setBounds(570, startY, 140, btnH);
+        clearButton.setBounds(570, 450, 140, 35);
         clearButton.addActionListener(this);
         add(clearButton);
 
         refreshTable();
     }
 
-    private JLabel createLabel(String text, int x, int y) {
-        JLabel lbl = new JLabel(text);
-        lbl.setBounds(x, y, 100, 25);
-        return lbl;
-    }
-
     public void refreshTable() {
         tableModel.setRowCount(0);
         try {
             List<Supplier> suppliers = supplierService.getAllSuppliers();
-            
-            // Populate custom Hash Table to demonstrate hashing lookups
+
             SupplierHashTable hashTable = new SupplierHashTable();
             for (Supplier s : suppliers) {
                 hashTable.put(s);
@@ -123,21 +130,28 @@ public class SupplierPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == addButton) {
+            if (!idField.isEnabled()) {
+                JOptionPane.showMessageDialog(this,
+                        "You have selected an existing supplier row.\nClick 'Clear Form' to enter a new Supplier ID, or click 'Update Selected' to update this supplier.",
+                        "Action Not Allowed",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             String id = idField.getText().trim();
             String name = nameField.getText().trim();
             String contact = contactField.getText().trim();
             String address = addressField.getText().trim();
 
-            // Prevent blank inputs from being inserted
-            if (id.isEmpty() || name.isEmpty()) {
-                JOptionPane.showMessageDialog(this, 
-                    "Supplier ID and Name cannot be empty!", 
-                    "Validation Error", 
-                    JOptionPane.WARNING_MESSAGE);
+            if (id.isEmpty() || name.isEmpty() || contact.isEmpty() || address.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "All fields (Supplier ID, Name, Contact, Address) are required!",
+                        "Validation Error",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
             try {
-                Supplier s = new Supplier(idField.getText().trim(), nameField.getText().trim(), contactField.getText().trim(), addressField.getText().trim());
+                Supplier s = new Supplier(id, name, contact, address);
                 supplierService.addSupplier(s);
                 refreshTable();
                 clearForm();
@@ -146,8 +160,21 @@ public class SupplierPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Error adding supplier: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else if (e.getSource() == updateButton) {
+            String id = idField.getText().trim();
+            String name = nameField.getText().trim();
+            String contact = contactField.getText().trim();
+            String address = addressField.getText().trim();
+
+            if (id.isEmpty() || name.isEmpty() || contact.isEmpty() || address.isEmpty()) {
+                JOptionPane.showMessageDialog(this, 
+                        "Select a supplier from the table to update, and make sure all fields are filled.", 
+                        "Validation Error", 
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             try {
-                Supplier s = new Supplier(idField.getText().trim(), nameField.getText().trim(), contactField.getText().trim(), addressField.getText().trim());
+                Supplier s = new Supplier(id, name, contact, address);
                 supplierService.updateSupplier(s);
                 refreshTable();
                 clearForm();
