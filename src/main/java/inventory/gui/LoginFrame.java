@@ -22,8 +22,7 @@ public class LoginFrame extends JFrame implements ActionListener {
         setLayout(null); // Pure absolute layout
 
         JLabel titleLabel = new JLabel("System Login");
-        titleLabel.setBounds(140, 30, 200, 30);
-        titleLabel.setFont(titleLabel.getFont().deriveFont(20.0f));
+        titleLabel.setBounds(185, 30, 200, 30);
         add(titleLabel);
 
         JLabel userLabel = new JLabel("Username:");

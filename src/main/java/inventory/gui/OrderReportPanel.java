@@ -29,45 +29,44 @@ public class OrderReportPanel extends JPanel implements ActionListener {
         scrollPane.setBounds(30, 30, 900, 300);
         add(scrollPane);
 
-        int startY = 360;
-        int lblX = 30, txtX = 140, width = 280, height = 25;
+        // Form Fields (Row 1 - Y: 360)
+        JLabel lblProdId = new JLabel("Product ID:");
+        lblProdId.setBounds(30, 360, 100, 25);
+        add(lblProdId);
 
-        add(createLabel("Product ID:", lblX, startY));
         prodIdField = new JTextField();
-        prodIdField.setBounds(txtX, startY, width, height);
+        prodIdField.setBounds(140, 360, 280, 25);
         add(prodIdField);
 
-        add(createLabel("Quantity:", lblX + 460, startY));
+        JLabel lblQty = new JLabel("Quantity:");
+        lblQty.setBounds(490, 360, 100, 25);
+        add(lblQty);
+
         qtyField = new JTextField();
-        qtyField.setBounds(txtX + 460, startY, width, height);
+        qtyField.setBounds(600, 360, 280, 25);
         add(qtyField);
 
-        startY += 40;
-        add(createLabel("Total Cost ($):", lblX, startY));
+        // Form Fields (Row 2 - Y: 400)
+        JLabel lblCost = new JLabel("Total Cost ($):");
+        lblCost.setBounds(30, 400, 100, 25);
+        add(lblCost);
+
         costField = new JTextField();
-        costField.setBounds(txtX, startY, width, height);
+        costField.setBounds(140, 400, 280, 25);
         add(costField);
 
-        startY += 60;
-        int btnW = 180, btnH = 35;
-
+        // Action Buttons (Y: 460)
         orderButton = new JButton("Place Stock Order");
-        orderButton.setBounds(30, startY, btnW, btnH);
+        orderButton.setBounds(30, 460, 180, 35);
         orderButton.addActionListener(this);
         add(orderButton);
 
         refreshButton = new JButton("Refresh Report");
-        refreshButton.setBounds(230, startY, btnW, btnH);
+        refreshButton.setBounds(230, 460, 180, 35);
         refreshButton.addActionListener(this);
         add(refreshButton);
 
         refreshTable();
-    }
-
-    private JLabel createLabel(String text, int x, int y) {
-        JLabel lbl = new JLabel(text);
-        lbl.setBounds(x, y, 100, 25);
-        return lbl;
     }
 
     public void refreshTable() {
@@ -102,7 +101,7 @@ public class OrderReportPanel extends JPanel implements ActionListener {
                 costField.setText("");
                 JOptionPane.showMessageDialog(this, "Stock order placed & inventory updated successfully.");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid order details: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Invalid order details: Fill all missing Fields ", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } else if (e.getSource() == refreshButton) {
             refreshTable();
